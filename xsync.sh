@@ -35,6 +35,15 @@ function sync_ubuntu {
     sync /ubuntu/dists
 }
 
+function sync_ros {
+    sync /ros/ubuntu/dists
+    sync /ros/ubuntu/pool/main
+}
+
+function sync_archlinux {
+    sync /archlinux
+}
+
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}Error: This script must be run as root${NC}" 1>&2
    exit 1
@@ -44,4 +53,7 @@ mykill perl 10
 mykill rsync 10
 try btrfs subvolume delete $PUBLISH
 try btrfs subvolume snapshot -r $MIRROR $PUBLISH
+
 sync_ubuntu
+sync_ros
+sync_archlinux
