@@ -79,7 +79,7 @@ fi
 
 # compress last log file
 try tar -jcvf "$LOG_PATH/$(date +%m-%d_%H-%M-%S)_log.tar.bz2" $LOG_PATH/xsync.log
-try rm -f $LOG_PATH/xsync.log
+try rm -f "$LOG_PATH/xsync.log"
 
 try btrfs subvolume delete $PUBLISH
 try btrfs subvolume snapshot -r $MIRROR $PUBLISH
