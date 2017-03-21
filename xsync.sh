@@ -3,7 +3,7 @@
 MIRROR=/data/mirrors
 PUBLISH=/data/publish
 UPSTREAM=mirrors.tuna.tsinghua.edu.cn
-LOG=/etc/xmirror/xsync.log
+LOG=/etc/xmirror
 
 RED='\033[0;31m'
 NC='\033[0m'
@@ -27,7 +27,7 @@ function checkprocess {
 }
 
 function sync {
-    ls $MIRROR$1 | parallel -j20 --ungroup rsync -avK --timeout=10 rsync://$UPSTREAM$1/{} $MIRROR$1 >>$LOG 2>&1 &
+    ls $MIRROR$1 | parallel -j20 --ungroup rsync -avK --timeout=10 rsync://$UPSTREAM$1/{} $MIRROR$1 >>$LOG/xsync.log 2>&1 &
 }
 
 function sync_job {
@@ -76,6 +76,11 @@ if [[ $max_wait_times -eq -1 ]]; then
     echo "Last sync job not complete, quit."
     exit 1
 fi
+
+# compress last log file
+try tar -jcvf "$LOG_PATH/$(date +%m-%d_%H-%M-%S)_log.tar.bz2" $LOG_PATH/xsync.log
+try rm -f $LOG_PATH/xsync.log
+
 try btrfs subvolume delete $PUBLISH
 try btrfs subvolume snapshot -r $MIRROR $PUBLISH
 
