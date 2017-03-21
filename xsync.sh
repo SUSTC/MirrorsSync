@@ -59,7 +59,7 @@ fi
 #cron job run this scrip every 4h(=48*300s)
 max_wait_times=45
 exit_code=-1
-while [[ ($max_wait_times -gt 0) || ($exit_code -eq -1) ]]; do
+while [ $max_wait_times -gt 0 ] && [ $exit_code -eq -1 ]; do
     max_wait_times=$[$max_wait_times-1]
     echo "Wait for rsync jobs."
     checkprocess rsync 0 "sleep 300"
