@@ -14,12 +14,16 @@ function try {
     ERROR=$("$@" 2>&1 >/dev/null) || echo -e "${RED}Error occured when exec $@:\n\t${BLUE}${ERROR}${NC}"
 }
 
-function mysleep {
-    echo "Waiting for $1 cleanup...";sleep $2
-}
-
-function mykill {
-    killall $1 >/dev/nul 2>&1 && mysleep $1 $2
+# checkprocess [processName] [processNum] [do if larger than $2]
+function checkprocess {
+    PROCESS_NUM=$(ps -ef | grep "$1" | grep -v "grep" | wc -l)
+    if [ $PROCESS_NUM -gt $2 ];
+    then
+        $3
+        return -1
+    else
+        return 0
+    fi
 }
 
 function sync {
@@ -52,8 +56,24 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-mykill perl 10
-mykill rsync 10
+#cron job run this scrip every 4h(=48*300s)
+max_wait_times=45
+exit_code=-1
+while [[ ($max_wait_times -gt 0) || ($exit_code -eq -1) ]]; do
+    i=$[$i-1]
+    checkprocess rsync 0 "sleep 300"
+    exit_code=$?
+done
+exit_code=-1
+while [[ ($max_wait_times -gt 0) || ($exit_code -eq -1) ]]; do
+    i=$[$i-1]
+    checkprocess perl 0 "sleep 300"
+    exit_code=$?
+done
+if [[ max_wait_times -eq 0 ]]; then
+    echo "Last sync job not complete, quit."
+    exit 1
+fi
 try btrfs subvolume delete $PUBLISH
 try btrfs subvolume snapshot -r $MIRROR $PUBLISH
 
