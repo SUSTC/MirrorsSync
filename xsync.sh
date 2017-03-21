@@ -65,13 +65,6 @@ while [[ ($max_wait_times -gt 0) || ($exit_code -eq -1) ]]; do
     checkprocess rsync 0 "sleep 300"
     exit_code=$?
 done
-exit_code=-1
-while [[ ($max_wait_times -gt 0) || ($exit_code -eq -1) ]]; do
-    max_wait_times=$[$max_wait_times-1]
-    echo "Wait for rsync parallel complete."
-    checkprocess perl 0 "sleep 300"
-    exit_code=$?
-done
 if [[ $max_wait_times -eq -1 ]]; then
     echo "Last sync job not complete, quit."
     exit 1
