@@ -27,7 +27,7 @@ function checkprocess {
 }
 
 function sync {
-    ls $MIRROR$1 | parallel -j20 --ungroup rsync -avK --timeout=10 rsync://$UPSTREAM$1/{} $MIRROR$1 >>$LOG/xsync.log 2>&1 &
+    ls $MIRROR$1 | parallel -j20 --ungroup --retries 3 rsync -avK --timeout=10 rsync://$UPSTREAM$1/{} $MIRROR$1 >>$LOG/xsync.log 2>&1 &
 }
 
 function sync_job {
