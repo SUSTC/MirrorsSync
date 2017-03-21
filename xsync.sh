@@ -26,22 +26,25 @@ function sync {
     ls $MIRROR$1 | parallel -j20 --ungroup rsync -avK --timeout=10 rsync://$UPSTREAM$1/{} $MIRROR$1 >>$LOG 2>&1 &
 }
 
-UBUNTU_POOL="main multiverse restricted universe"
-
-function sync_ubuntu {
+function sync_job {
+    #ubuntu
     for part in $UBUNTU_POOL ; do
         sync /ubuntu/pool/$part
     done
     sync /ubuntu/dists
-}
-
-function sync_ros {
+    #ros
     sync /ros/ubuntu/dists
     sync /ros/ubuntu/pool/main
-}
-
-function sync_archlinux {
+    #archlinux
     sync /archlinux
+    sync /archlinuxarm
+    sync /archlinuxcn
+    #raspi
+    sync /raspbian
+    #cygwin
+    sync /cygwin
+    #qt
+    sync /qt
 }
 
 if [[ $EUID -ne 0 ]]; then
@@ -54,6 +57,4 @@ mykill rsync 10
 try btrfs subvolume delete $PUBLISH
 try btrfs subvolume snapshot -r $MIRROR $PUBLISH
 
-sync_ubuntu
-sync_ros
-sync_archlinux
+sync_job
